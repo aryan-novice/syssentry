@@ -68,7 +68,8 @@ class LogWatch:
                 continue
             if len(stamps) >= self.threshold and key not in self.alerted:
                 self.alerted.add(key)
-                events.append(Event("warning", f"log:{os.path.basename(self.path)}", self._message(key, len(stamps)), len(stamps)))
+                source = f"log:{os.path.basename(self.path)}"
+                events.append(Event("warning", source, self._message(key, len(stamps)), len(stamps)))
         return events
 
     def _message(self, key: str, count: int) -> str:
