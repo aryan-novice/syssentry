@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+*.db
+*.db-shm
+*.db-wal
+demo/alerts.log
+demo/auth.log
+demo/report.md
+demo/*.pid
+triage-*.txt

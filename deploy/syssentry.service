@@ -1,0 +1,22 @@
+[Unit]
+Description=SysSentry server health monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=syssentry
+Group=syssentry
+WorkingDirectory=/opt/syssentry
+ExecStart=/opt/syssentry/venv/bin/python -m syssentry -c /etc/syssentry/config.yaml run --with-web
+Restart=on-failure
+RestartSec=5
+# Hardening: the agent only needs to read the system and write its own data.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/syssentry /var/log/syssentry
+
+[Install]
+WantedBy=multi-user.target

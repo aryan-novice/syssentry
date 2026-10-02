@@ -1,0 +1,27 @@
+hostname: demo-host
+interval_seconds: 2
+database: demo/demo.db
+thresholds:
+  - {metric: cpu_percent, warn: 80, crit: 95, for: 3}
+  - {metric: "disk_percent:/", warn: 80, crit: 90, for: 1}
+services:
+  - name: demo-api
+    type: http
+    url: http://127.0.0.1:8099/health
+    expect_text: healthy
+    timeout: 1
+    failures_before_alert: 2
+    remediation:
+      command: ["bash", "demo/start_app.sh"]
+logs:
+  - {path: demo/auth.log, pattern: ssh_failed, threshold: 5, window_seconds: 300}
+alerts:
+  cooldown_seconds: 60
+  channels:
+    - type: console
+    - type: file
+      path: demo/alerts.log
+remediation:
+  enabled: true
+  dry_run: false
+  max_attempts: 3

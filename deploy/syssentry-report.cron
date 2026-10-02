@@ -1,0 +1,2 @@
+# /etc/cron.d/syssentry-report: shift-handover report every day at 06:00 (end of night shift)
+0 6 * * * syssentry /opt/syssentry/venv/bin/python -m syssentry -c /etc/syssentry/config.yaml report --hours 12 -o /var/log/syssentry/handover-$(date +\%F).md

@@ -1,0 +1,57 @@
+# SysSentry configuration. Copy to /etc/syssentry/config.yaml and adjust.
+hostname: web-01            # optional, defaults to the machine hostname
+interval_seconds: 30
+database: /var/lib/syssentry/syssentry.db
+retention_days: 7
+
+# A metric changes state only after `for` consecutive samples (flap protection).
+thresholds:
+  - {metric: cpu_percent,     warn: 80,  crit: 95, for: 3}
+  - {metric: memory_percent,  warn: 80,  crit: 92, for: 3}
+  - {metric: swap_percent,    warn: 50,  crit: 80, for: 3}
+  - {metric: "disk_percent:/", warn: 80, crit: 90, for: 1}
+  - {metric: load_per_cpu,    warn: 1.5, crit: 3.0, for: 3}
+
+services:
+  - name: nginx
+    type: systemd
+    unit: nginx.service
+    remediation: restart            # built-in: systemctl restart <unit>
+  - name: ssh
+    type: tcp
+    host: 127.0.0.1
+    port: 22
+  - name: api
+    type: http
+    url: http://127.0.0.1:8000/health
+    expect_status: 200
+    expect_text: healthy
+    timeout: 3
+    failures_before_alert: 2
+    remediation:
+      command: ["systemctl", "restart", "api.service"]
+  - name: cron
+    type: process
+    pattern: cron
+
+logs:
+  - {path: /var/log/auth.log, pattern: ssh_failed, threshold: 5, window_seconds: 300}
+  - {path: /var/log/syslog,   pattern: errors,     threshold: 20, window_seconds: 300}
+
+alerts:
+  cooldown_seconds: 300
+  channels:
+    - type: console
+    - type: file
+      path: /var/log/syssentry/alerts.log
+    # - type: webhook
+    #   url: https://hooks.slack.com/services/XXX/YYY/ZZZ
+
+remediation:
+  enabled: true
+  dry_run: true        # flip to false once you trust the runbooks
+  max_attempts: 3
+
+web:
+  host: 0.0.0.0
+  port: 8085
